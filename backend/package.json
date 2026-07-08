@@ -1,0 +1,25 @@
+{
+  "name": "plugbot-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PlugBot AI MVP backend",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node scripts/smoke-check.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@google/genai": "^2.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "openai": "^4.77.0",
+    "zod": "^3.24.1"
+  }
+}

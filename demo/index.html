@@ -1,90 +1,93 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PlugBot AI Demo</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        color: #111827;
-        background: #f3f4f6;
-      }
 
-      main {
-        max-width: 880px;
-        margin: 0 auto;
-        padding: 56px 20px;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PlugBot AI Demo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #111827;
+      background: #f3f4f6;
+    }
 
-      section {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 28px;
-      }
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 56px 20px;
+    }
 
-      h1 {
-        margin: 0 0 12px;
-        font-size: 34px;
-      }
+    section {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 28px;
+    }
 
-      p {
-        margin: 0 0 14px;
-        line-height: 1.6;
-      }
+    h1 {
+      margin: 0 0 12px;
+      font-size: 34px;
+    }
 
-      code {
-        background: #eef2ff;
-        border-radius: 4px;
-        padding: 2px 6px;
-      }
-    </style>
-  </head>
-  <body>
-    <main>
-      <section>
-        <h1>PlugBot AI Demo</h1>
-        <p>
-          This page loads the vanilla JavaScript widget from
-          <code>../widget/plugbot-widget.js</code>.
-        </p>
-        <p>
-          For local development, start the backend on
-          <code>http://localhost:3000</code>, then open this page and use the
-          launcher in the bottom-right corner.
-        </p>
-        <p>
-          API URL: <code id="plugbot-api-url">loading...</code>
-        </p>
-      </section>
-    </main>
+    p {
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
 
-    <script>
-      window.PlugBotDemo = window.PlugBotDemo || {
-        productionApiUrl: "https://YOUR-RENDER-SERVICE.onrender.com"
-      };
+    code {
+      background: #eef2ff;
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+  </style>
+</head>
 
-      const params = new URLSearchParams(window.location.search);
-      const isLocalDemo =
-        window.location.protocol === "file:" ||
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
-      const apiUrl =
-        params.get("apiUrl") ||
-        (isLocalDemo
-          ? "http://localhost:3000"
-          : window.PlugBotDemo.productionApiUrl);
+<body>
+  <main>
+    <section>
+      <h1>PlugBot AI Demo</h1>
+      <p>
+        This page loads the vanilla JavaScript widget from
+        <code>../widget/plugbot-widget.js</code>.
+      </p>
+      <p>
+        For local development, start the backend on
+        <code>http://localhost:3000</code>, then open this page and use the
+        launcher in the bottom-right corner.
+      </p>
+      <p>
+        API URL: <code id="plugbot-api-url">loading...</code>
+      </p>
+    </section>
+  </main>
 
-      document.getElementById("plugbot-api-url").textContent = apiUrl;
+  <script>
+    window.PlugBotDemo = window.PlugBotDemo || {
+      productionApiUrl: "https://plugbot-ai-6zea.onrender.com/"
+    };
 
-      const widgetScript = document.createElement("script");
-      widgetScript.src = "../widget/plugbot-widget.js";
-      widgetScript.dataset.botId = "demo-bot";
-      widgetScript.dataset.apiUrl = apiUrl;
-      widgetScript.dataset.title = "Demo PlugBot";
-      document.body.appendChild(widgetScript);
-    </script>
-  </body>
+    const params = new URLSearchParams(window.location.search);
+    const isLocalDemo =
+      window.location.protocol === "file:" ||
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1";
+    const apiUrl =
+      params.get("apiUrl") ||
+      (isLocalDemo ?
+        "http://localhost:3000" :
+        window.PlugBotDemo.productionApiUrl);
+
+    document.getElementById("plugbot-api-url").textContent = apiUrl;
+
+    const widgetScript = document.createElement("script");
+    widgetScript.src = "../widget/plugbot-widget.js";
+    widgetScript.dataset.botId = "demo-bot";
+    widgetScript.dataset.apiUrl = apiUrl;
+    widgetScript.dataset.title = "Demo PlugBot";
+    document.body.appendChild(widgetScript);
+  </script>
+</body>
+
 </html>

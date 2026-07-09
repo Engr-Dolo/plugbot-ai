@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { buildGroundedSystemPrompt } from "./context.js";
 import {
   AIProviderError,
   authenticationFailedMessage,
@@ -18,7 +19,7 @@ export function createGeminiProvider({
 
   return {
     name: "gemini",
-    async generateReply({ botId, message, history = [] }) {
+    async generateReply({ botId, message, history = [], botContext }) {
       if (!client) {
         throw new AIProviderError(
           "Gemini is not configured. Set GEMINI_API_KEY before using chat."
@@ -33,9 +34,7 @@ export function createGeminiProvider({
             { role: "user", parts: [{ text: message }] }
           ],
           config: {
-            systemInstruction:
-              "You are PlugBot AI, a helpful embedded website chatbot. " +
-              `Answer concisely for bot ID "${botId}". If you do not know, say so.`
+            systemInstruction: buildGroundedSystemPrompt({ botId, botContext })
           }
         });
 

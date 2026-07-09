@@ -1,0 +1,384 @@
+{
+  "version": 1,
+  "botId": "timetomarket-services",
+  "createdAt": "2026-07-09T06:26:14.526Z",
+  "source": {
+    "websiteUrl": "https://engr-dolo.github.io/TimetoMarket-Services/",
+    "allowedOrigins": [
+      "https://engr-dolo.github.io"
+    ],
+    "allowedPathPrefixes": [
+      "/TimetoMarket-Services/"
+    ]
+  },
+  "pages": [
+    {
+      "botId": "timetomarket-services",
+      "pageUrl": "https://engr-dolo.github.io/TimetoMarket-Services/",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "crawlTimestamp": "2026-07-09T06:26:06.013Z",
+      "contentHash": "b81a0b41fc0012ae6529ea5b3938108e3d40e3476829166662ad90ac6a9dba69",
+      "sensitivityFilterStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQuality": {
+        "status": "SUFFICIENT",
+        "reason": "Meaningful visible body content was extracted.",
+        "meaningfulSectionCount": 11,
+        "textLength": 2406,
+        "uniqueWordCount": 111
+      },
+      "diagnostics": {
+        "fetch": {
+          "title": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+          "bodyTextLength": 2145,
+          "headingCount": 14,
+          "paragraphCount": 11,
+          "sectionCount": 4,
+          "linkCount": 24
+        },
+        "extraction": {
+          "htmlByteLength": 22526,
+          "headingCount": 14,
+          "paragraphCount": 11,
+          "listItemCount": 0,
+          "semanticSectionCount": 4,
+          "extractedTextLength": 2406,
+          "sectionCount": 11
+        }
+      }
+    },
+    {
+      "botId": "timetomarket-services",
+      "pageUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "crawlTimestamp": "2026-07-09T06:26:12.333Z",
+      "contentHash": "47c6f6226be6618ac790477a3c00458238f633e3dc43b367da08ed076a74fb64",
+      "sensitivityFilterStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQuality": {
+        "status": "SUFFICIENT",
+        "reason": "Meaningful visible body content was extracted.",
+        "meaningfulSectionCount": 6,
+        "textLength": 994,
+        "uniqueWordCount": 71
+      },
+      "diagnostics": {
+        "fetch": {
+          "title": "Project Intake Form — TimetoMarket Services",
+          "bodyTextLength": 443,
+          "headingCount": 6,
+          "paragraphCount": 8,
+          "sectionCount": 0,
+          "linkCount": 3
+        },
+        "extraction": {
+          "htmlByteLength": 19511,
+          "headingCount": 6,
+          "paragraphCount": 8,
+          "listItemCount": 0,
+          "semanticSectionCount": 0,
+          "extractedTextLength": 994,
+          "sectionCount": 6
+        }
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "b81a0b41fc-section-1",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Everything your business needs to thrive online",
+      "text": "Everything your business needs to thrive online\nWeb Design & Build\nCustom storefronts, business sites and webapps built from scratch — fast, beautiful and designed to convert.\nSecurity & Monitoring\nYour platform hardened, watched and protected around the clock — SSL, firewall, malware scanning and alerts.\nPlatform Management\nOngoing updates, content changes and growth support. You run your business — I run your tech.\nAI-Powered Features\nSmart chatbots, booking systems and AI integrations that make your platform work harder for you.\nSee All Services →",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "f4dbd80f4783ce9c2500d3e795211eeabd80694ad2ce3a141a2ab9fe6414769e",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-web-design-build",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-web-design-build",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Web Design & Build",
+      "text": "Web Design & Build\nCustom storefronts, business sites and webapps built from scratch — fast, beautiful and designed to convert.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "cbabb3671ee80a7f67d61b8750352200a069cc1f168b7127da7e4cceff4c3b7f",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-security-monitoring",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-security-monitoring",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Security & Monitoring",
+      "text": "Security & Monitoring\nYour platform hardened, watched and protected around the clock — SSL, firewall, malware scanning and alerts.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "891f7ddb37ecd33f93c315b717ef63d84283f819d5d65249c19b7124a8397052",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-platform-management",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-platform-management",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Platform Management",
+      "text": "Platform Management\nOngoing updates, content changes and growth support. You run your business — I run your tech.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "70e1561770d000da96b54a4383fbc0c4192e5245c0da4a4161af0df86181119f",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-ai-powered-features",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-ai-powered-features",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "AI-Powered Features",
+      "text": "AI-Powered Features\nSmart chatbots, booking systems and AI integrations that make your platform work harder for you.\nSee All Services →",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "c75f121a6414bdeafee429c8bb94acdcd4a7541b9d54bb8d7933355dc4ffd78e",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-6",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Simple process,\npowerful results",
+      "text": "Simple process,\npowerful results\nFree Consultation\nWe talk about your business and goals. No jargon, no pressure — just an honest conversation.\nDesign & Build\nI build your platform — clean, fast, mobile-first and secured. You have full input at every stage.\nLaunch & Hand Over\nYour platform goes live. I walk you through everything and hand over full control to you.\nOngoing Support\nI stay available — updates, fixes, new features. You are never left alone with your platform.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "ca4feda5829aba3b9b13034fad8781174feb7eadb1eecc942ef99d5305f8e0e6",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-free-consultation",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-free-consultation",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Free Consultation",
+      "text": "Free Consultation\nWe talk about your business and goals. No jargon, no pressure — just an honest conversation.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "b8b05bfb34d0af75a83f640e241e053e39e6b5b5c94846b583a9451f0e9ab8f9",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-design-build",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-design-build",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Design & Build",
+      "text": "Design & Build\nI build your platform — clean, fast, mobile-first and secured. You have full input at every stage.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "717a217b5382ffca18f3c23e566af45f6983b6cf605fa2f87cef50af434bc31a",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-launch-hand-over",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-launch-hand-over",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Launch & Hand Over",
+      "text": "Launch & Hand Over\nYour platform goes live. I walk you through everything and hand over full control to you.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "5cf228b2226c2bf93950d7af804c931c1fe93c3299784b5dc19fd0d9dd080735",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-ongoing-support",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/#section-ongoing-support",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Ongoing Support",
+      "text": "Ongoing Support\nI stay available — updates, fixes, new features. You are never left alone with your platform.",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "4136eeae25c26920abc4f58074c003129d6ad940db22e8c75f00fffedf27607a",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "b81a0b41fc-section-11",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/",
+      "pageTitle": "TimetoMarket-Services — Secure Webapps for Growing Businesses",
+      "heading": "Let's build your\ndigital presence today",
+      "text": "Let's build your\ndigital presence today\nFirst consultation is completely free. No commitment, no jargon — just a real conversation about getting your business online the right way.\nBook Free Consultation\n💬 WhatsApp Me",
+      "crawledAt": "2026-07-09T06:26:06.013Z",
+      "contentHash": "27b5f15afa0486646819e0a27a7a029a9189cdc77cae15b983d08ccf96aed3fa",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-let-s-build-something-remarkable",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#let-s-build-something-remarkable",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Let's build something remarkable",
+      "text": "Let's build something remarkable\nFill in this short brief so I can understand your project. I'll review it and respond within 24 hours with a free, personalised consultation plan.",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "a8bb6e2280e85456f29de9ce20e49a43119c0807633e96d7660f9470fa0d93d0",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-who-are-you",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#who-are-you",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Who are you?",
+      "text": "Who are you?\nStart with your basic contact details so I know how to reach you.\nContinue →",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "3140ef124ec94f6a6043337178647d5ec169e2812ba893f3a826f45bb322d105",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-tell-me-about-your-project",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#tell-me-about-your-project",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Tell me about your project",
+      "text": "Tell me about your project\nWhat do you need built? Select all that apply.\n← Back\nContinue →",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "e816141c4a2358e40491e2f87165d85ecb411dd42c8626c20ca4984696f4b85e",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-budget-timeline",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#budget-timeline",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Budget & Timeline",
+      "text": "Budget & Timeline\nHelp me understand your investment range and when you need it done.\n← Back\nContinue →",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "c0af4916e9bf1a2849cbddc7afa9ce8d242928352c70defc0ca47398f29a0899",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-almost-done",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#almost-done",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Almost done!",
+      "text": "Almost done!\nShare any inspiration or extra details to help me understand your vision.\nThese help me understand the look and feel you're going for.\n← Back\nSend via WhatsApp 🚀\nYour brief opens in WhatsApp pre-filled. No account needed. I reply within 24 hours.",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "4e661940f61d6cec249a899acb61ac335d311598f0f33c02f69c5dfc530c9d0e",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    },
+    {
+      "id": "47c6f6226b-brief-sent-successfully",
+      "botId": "timetomarket-services",
+      "sourceUrl": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html#brief-sent-successfully",
+      "pageTitle": "Project Intake Form — TimetoMarket Services",
+      "heading": "Brief sent successfully!",
+      "text": "Brief sent successfully!\nWhatsApp opened with your complete project brief. I'll review it and respond within 24 hours with a free consultation plan.\n← Back to Site\nSubmit Another",
+      "crawledAt": "2026-07-09T06:26:12.333Z",
+      "contentHash": "cf589a566cee610d0912d32b0e4409031d1281c9657c33eda7632f4950a9a7a4",
+      "sensitivityStatus": "clean",
+      "ingestionStatus": "included",
+      "extractionQualityStatus": "SUFFICIENT"
+    }
+  ],
+  "summary": {
+    "pagesDiscovered": 6,
+    "pagesCrawled": 2,
+    "pagesSkipped": 4,
+    "pagesRejected": 4,
+    "sensitiveFindings": [],
+    "knowledgeSections": 17,
+    "extractionQuality": {
+      "status": "SUFFICIENT",
+      "reason": "All crawled pages produced meaningful visible content.",
+      "meaningfulSectionCount": 17
+    }
+  },
+  "crawlOutcomes": [
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/",
+      "category": "crawled",
+      "code": "CRAWLED_OK",
+      "reason": "Page was crawled and included in the sanitized snapshot."
+    },
+    {
+      "url": "https://wa.me/[redacted]",
+      "category": "skipped",
+      "code": "SKIPPED_OUTSIDE_ALLOWED_ORIGIN",
+      "reason": "URL origin is not authorized for this bot."
+    },
+    {
+      "url": "https://wa.me/[redacted]",
+      "category": "skipped",
+      "code": "SKIPPED_OUTSIDE_ALLOWED_ORIGIN",
+      "reason": "URL origin is not authorized for this bot."
+    },
+    {
+      "url": "https://github.com/Engr-Dolo",
+      "category": "skipped",
+      "code": "SKIPPED_OUTSIDE_ALLOWED_ORIGIN",
+      "reason": "URL origin is not authorized for this bot."
+    },
+    {
+      "url": "https://wa.me/[redacted]",
+      "category": "skipped",
+      "code": "SKIPPED_OUTSIDE_ALLOWED_ORIGIN",
+      "reason": "URL origin is not authorized for this bot."
+    },
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/portfolio",
+      "category": "rejected",
+      "code": "REJECTED_HTTP_STATUS",
+      "reason": "HTTP 404"
+    },
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/services",
+      "category": "rejected",
+      "code": "REJECTED_HTTP_STATUS",
+      "reason": "HTTP 404"
+    },
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/about",
+      "category": "rejected",
+      "code": "REJECTED_HTTP_STATUS",
+      "reason": "HTTP 404"
+    },
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/intake-form.html",
+      "category": "crawled",
+      "code": "CRAWLED_OK",
+      "reason": "Page was crawled and included in the sanitized snapshot."
+    },
+    {
+      "url": "https://engr-dolo.github.io/TimetoMarket-Services/contact",
+      "category": "rejected",
+      "code": "REJECTED_HTTP_STATUS",
+      "reason": "HTTP 404"
+    }
+  ]
+}

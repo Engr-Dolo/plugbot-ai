@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { buildGroundedSystemPrompt } from "./context.js";
 import { AIProviderError, quotaExhaustedMessage } from "./errors.js";
 
 export function createOpenAIProvider({
@@ -10,7 +11,7 @@ export function createOpenAIProvider({
 
   return {
     name: "openai",
-    async generateReply({ botId, message, history = [] }) {
+    async generateReply({ botId, message, history = [], botContext }) {
       if (!client) {
         throw new AIProviderError(
           "OpenAI is not configured. Set OPENAI_API_KEY before using chat."
@@ -23,9 +24,7 @@ export function createOpenAIProvider({
           messages: [
             {
               role: "system",
-              content:
-                "You are PlugBot AI, a helpful embedded website chatbot. " +
-                `Answer concisely for bot ID "${botId}". If you do not know, say so.`
+              content: buildGroundedSystemPrompt({ botId, botContext })
             },
             ...history,
             { role: "user", content: message }

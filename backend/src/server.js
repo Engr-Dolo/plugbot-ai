@@ -5,6 +5,9 @@ import rateLimit from "express-rate-limit";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
+import { resolveBotConfig } from "./bots/index.js";
+import { createJsonKnowledgeStore } from "./knowledge/knowledgeStore.js";
+import { resolveKnowledgeContext } from "./knowledge/knowledgeResolver.js";
 import {
   AIProviderError,
   createAIProvider,
@@ -28,6 +31,7 @@ const port = Number(process.env.PORT || 3000);
 const allowedOrigins = getAllowedOrigins(process.env);
 
 app.locals.aiProvider = createAIProvider();
+app.locals.knowledgeStore = createJsonKnowledgeStore();
 
 const chatRequestSchema = z.object({
   botId: z.string().trim().min(1).max(100),
@@ -87,10 +91,19 @@ app.post("/api/chat", async (req, res, next) => {
     }
 
     const { botId, message, history = [] } = parsed.data;
-    const reply = await req.app.locals.aiProvider.generateReply({
-      botId,
+    const botConfig = resolveBotConfig(botId);
+    const botContext = await resolveKnowledgeContext({
+      botConfig,
       message,
-      history
+      history,
+      store: req.app.locals.knowledgeStore
+    });
+
+    const reply = await req.app.locals.aiProvider.generateReply({
+      botId: botConfig.botId,
+      message,
+      history,
+      botContext
     });
 
     res.json({ reply, botId });

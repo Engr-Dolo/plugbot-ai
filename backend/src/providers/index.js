@@ -28,7 +28,14 @@ export function createAIProvider(env = process.env) {
   );
 }
 
-export { AIProviderError, quotaExhaustedMessage } from "./errors.js";
+export {
+  AIProviderError,
+  createProviderError,
+  normalizeProviderError,
+  providerErrorCategories,
+  providerPublicMessages,
+  quotaExhaustedMessage
+} from "./errors.js";
 export { isOpenAIQuotaExhaustedError } from "./openaiProvider.js";
 export {
   isGeminiAuthenticationError,

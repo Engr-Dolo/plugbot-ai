@@ -10,7 +10,8 @@
     "dev": "node --watch src/server.js",
     "test": "node scripts/smoke-check.js",
     "ingest": "node scripts/ingest-knowledge.js",
-    "knowledge:inspect": "node scripts/inspect-knowledge.js"
+    "knowledge:inspect": "node scripts/inspect-knowledge.js",
+    "grounding:inspect": "node scripts/inspect-grounding.js"
   },
   "engines": {
     "node": ">=20"

@@ -1,11 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { buildGroundedSystemPrompt } from "./context.js";
 import {
-  AIProviderError,
-  authenticationFailedMessage,
-  providerTimeoutMessage,
-  providerUnavailableMessage,
-  quotaExhaustedMessage
+  createProviderError,
+  getProviderErrorCode,
+  getProviderErrorMessage,
+  getProviderErrorStatus,
+  normalizeProviderError,
+  providerErrorCategories
 } from "./errors.js";
 
 const defaultGeminiModel = "gemini-2.5-flash";
@@ -21,9 +22,7 @@ export function createGeminiProvider({
     name: "gemini",
     async generateReply({ botId, message, history = [], botContext }) {
       if (!client) {
-        throw new AIProviderError(
-          "Gemini is not configured. Set GEMINI_API_KEY before using chat."
-        );
+        throw createProviderError(providerErrorCategories.AUTH_ERROR);
       }
 
       try {
@@ -57,55 +56,50 @@ function normalizeGeminiText(response) {
   const text =
     typeof response?.text === "string" ? response.text.trim() : "";
 
-  return text || "I could not generate a response.";
+  if (!text) {
+    throw createProviderError(providerErrorCategories.INVALID_RESPONSE);
+  }
+
+  return text;
 }
 
 function normalizeGeminiError(error) {
   if (isGeminiQuotaError(error)) {
-    return new AIProviderError(quotaExhaustedMessage, {
-      status: 503,
-      cause: error
-    });
+    return createProviderError(providerErrorCategories.QUOTA_EXCEEDED, { cause: error });
   }
 
   if (isGeminiAuthenticationError(error)) {
-    return new AIProviderError(authenticationFailedMessage, {
-      status: 503,
-      cause: error
-    });
+    return createProviderError(providerErrorCategories.AUTH_ERROR, { cause: error });
   }
 
   if (isGeminiTimeoutError(error)) {
-    return new AIProviderError(providerTimeoutMessage, {
-      status: 504,
-      cause: error
-    });
+    return createProviderError(providerErrorCategories.TIMEOUT, { cause: error });
   }
 
   if (isGeminiAvailabilityError(error)) {
-    return new AIProviderError(providerUnavailableMessage, {
-      status: 503,
+    return createProviderError(providerErrorCategories.TEMPORARILY_UNAVAILABLE, {
       cause: error
     });
   }
 
-  return new AIProviderError("Something went wrong.", { cause: error });
+  return normalizeProviderError(error);
 }
 
 export function isGeminiQuotaError(error) {
-  const status = getErrorStatus(error);
-  const code = getErrorCode(error);
+  const status = getProviderErrorStatus(error);
+  const code = getProviderErrorCode(error);
+  const message = getProviderErrorMessage(error);
 
   return (
-    status === 429 ||
     code === "RESOURCE_EXHAUSTED" ||
-    code === "QUOTA_EXCEEDED"
+    code === "QUOTA_EXCEEDED" ||
+    message.includes("quota")
   );
 }
 
 export function isGeminiAuthenticationError(error) {
-  const status = getErrorStatus(error);
-  const code = getErrorCode(error);
+  const status = getProviderErrorStatus(error);
+  const code = getProviderErrorCode(error);
 
   return (
     status === 401 ||
@@ -116,9 +110,9 @@ export function isGeminiAuthenticationError(error) {
 }
 
 export function isGeminiTimeoutError(error) {
-  const status = getErrorStatus(error);
-  const code = getErrorCode(error);
-  const message = getErrorMessage(error);
+  const status = getProviderErrorStatus(error);
+  const code = getProviderErrorCode(error);
+  const message = getProviderErrorMessage(error);
 
   return (
     status === 408 ||
@@ -133,8 +127,8 @@ export function isGeminiTimeoutError(error) {
 }
 
 export function isGeminiAvailabilityError(error) {
-  const status = getErrorStatus(error);
-  const code = getErrorCode(error);
+  const status = getProviderErrorStatus(error);
+  const code = getProviderErrorCode(error);
 
   return (
     status === 500 ||
@@ -149,29 +143,4 @@ export function isGeminiAvailabilityError(error) {
     code === "ENETUNREACH" ||
     code === "EAI_AGAIN"
   );
-}
-
-function getErrorStatus(error) {
-  const status =
-    error?.status ||
-    error?.statusCode ||
-    error?.code ||
-    error?.error?.status ||
-    error?.error?.code;
-
-  return typeof status === "number" ? status : Number(status) || undefined;
-}
-
-function getErrorCode(error) {
-  return String(
-    error?.error?.status ||
-      error?.error?.code ||
-      error?.status ||
-      error?.code ||
-      ""
-  ).toUpperCase();
-}
-
-function getErrorMessage(error) {
-  return String(error?.message || error?.error?.message || "").toLowerCase();
 }

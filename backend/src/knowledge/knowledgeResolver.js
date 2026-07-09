@@ -3,6 +3,7 @@ import { truncateText } from "./normalizer.js";
 
 const stopWords = new Set([
   "a",
+  "about",
   "an",
   "and",
   "are",
@@ -24,6 +25,7 @@ const stopWords = new Set([
   "or",
   "our",
   "the",
+  "tell",
   "to",
   "what",
   "when",
@@ -45,6 +47,7 @@ export async function resolveKnowledgeContext({
   const structuredKnowledge = buildStructuredKnowledge(botConfig);
   const snapshot = await store.loadSnapshot(botConfig.botId);
   const query = [message, ...history.slice(-3).map((entry) => entry.content)].join(" ");
+  const snapshotSections = Array.isArray(snapshot?.sections) ? snapshot.sections.length : 0;
   const websiteSections = selectRelevantSections({
     snapshot,
     query,
@@ -71,7 +74,12 @@ export async function resolveKnowledgeContext({
       available: Boolean(snapshot),
       sections: websiteSections,
       snapshotCreatedAt: snapshot?.createdAt || "",
-      sourceCount: snapshot?.pages?.length || 0
+      sourceCount: snapshot?.pages?.length || 0,
+      totalSections: snapshotSections,
+      contextCharacterCount: websiteSections.reduce(
+        (total, section) => total + String(section.text || "").length,
+        0
+      )
     }
   };
 }
@@ -107,7 +115,11 @@ export function selectRelevantSections({
     return [];
   }
 
-  const queryTokens = tokenize(query);
+  if (isSensitiveKnowledgeRequest(query)) {
+    return [];
+  }
+
+  const queryTokens = expandQueryTokens(tokenize(query));
   if (queryTokens.length === 0) {
     return [];
   }
@@ -116,20 +128,28 @@ export function selectRelevantSections({
     .filter((section) => section.botId === snapshot.botId)
     .map((section) => {
       const textTokens = tokenize(
-        `${section.pageTitle || ""} ${section.heading || ""} ${section.text || ""}`
+        `${section.heading || ""} ${section.text || ""}`
       );
       const headingTokens = tokenize(section.heading || "");
+      const normalizedQuery = normalizeForComparison(query);
+      const normalizedHeading = normalizeForComparison(section.heading);
+      const normalizedText = normalizeForComparison(section.text);
       const score = textTokens.reduce(
         (total, token) => total + (queryTokens.includes(token) ? 1 : 0),
         0
       );
       const headingOverlap = headingTokens.filter((token) => queryTokens.includes(token)).length;
-      const headingBoost = headingOverlap * 3;
-      const overviewBoost = isOverviewQuery(queryTokens) && looksLikeOverviewSection(section) ? 3 : 0;
+      const headingBoost = headingOverlap * 4;
+      const lexicalScore = score + headingOverlap;
+      const overviewBoost =
+        isOverviewQuery(queryTokens) && lexicalScore > 0 && looksLikeOverviewSection(section)
+          ? 3
+          : 0;
+      const intentBoost = getIntentBoost(queryTokens, normalizedQuery, normalizedHeading, normalizedText);
 
       return {
         section,
-        score: score + headingBoost + overviewBoost,
+        score: score + headingBoost + overviewBoost + intentBoost,
         headingOverlap,
         overview: looksLikeOverviewSection(section)
       };
@@ -261,6 +281,95 @@ function isOverviewQuery(queryTokens) {
       "work",
       "works"
     ].includes(token)
+  );
+}
+
+function expandQueryTokens(tokens) {
+  const expanded = new Set(tokens);
+  const expansions = {
+    ai: ["artificial", "intelligence", "chatbots", "automation", "integrations", "powered"],
+    automated: ["automation", "ai"],
+    chatbot: ["chatbots", "ai"],
+    chatbots: ["chatbot", "ai"],
+    secure: ["security", "monitoring", "protection", "hardened"],
+    secured: ["security", "monitoring", "protection", "hardened"],
+    protect: ["security", "monitoring", "protection"],
+    protection: ["security", "monitoring", "secure"],
+    consultation: ["consult", "intake", "brief", "project", "free"],
+    consult: ["consultation", "intake", "brief", "project", "free"],
+    book: ["consultation", "intake", "brief"],
+    request: ["consultation", "intake", "brief"],
+    contact: ["consultation", "intake", "whatsapp"],
+    package: ["pricing", "budget", "timeline"],
+    cheapest: ["pricing", "budget"],
+    price: ["pricing", "budget"],
+    prices: ["pricing", "budget"],
+    cost: ["pricing", "budget"]
+  };
+
+  for (const token of tokens) {
+    for (const extra of expansions[token] || []) {
+      expanded.add(extra);
+    }
+  }
+
+  return Array.from(expanded);
+}
+
+function getIntentBoost(queryTokens, normalizedQuery, normalizedHeading, normalizedText) {
+  let boost = 0;
+  const haystack = `${normalizedHeading} ${normalizedText}`;
+
+  if (queryTokens.includes("services") || queryTokens.includes("offer")) {
+    boost += phraseBoost(haystack, ["everything your business needs", "web design", "custom storefronts"], 5);
+  }
+
+  if (queryTokens.includes("ai") || normalizedQuery.includes("artificial intelligence")) {
+    boost += phraseBoost(haystack, ["ai powered features", "smart chatbots", "ai integrations"], 8);
+  }
+
+  if (queryTokens.includes("security") || queryTokens.includes("monitoring")) {
+    boost += phraseBoost(haystack, ["security monitoring", "hardened", "malware scanning", "firewall"], 8);
+  }
+
+  if (
+    queryTokens.includes("consultation") ||
+    queryTokens.includes("intake") ||
+    queryTokens.includes("brief")
+  ) {
+    boost += phraseBoost(haystack, ["free consultation", "project intake", "short brief", "consultation plan"], 7);
+  }
+
+  if (queryTokens.includes("contact") || queryTokens.includes("whatsapp")) {
+    boost += phraseBoost(haystack, ["whatsapp", "contact details", "brief opens in whatsapp"], 5);
+  }
+
+  if (queryTokens.includes("pricing") || queryTokens.includes("budget")) {
+    boost += phraseBoost(haystack, ["budget timeline", "investment range", "free consultation"], 4);
+  }
+
+  return boost;
+}
+
+function phraseBoost(text, phrases, points) {
+  return phrases.some((phrase) => text.includes(phrase)) ? points : 0;
+}
+
+function isSensitiveKnowledgeRequest(query) {
+  const normalized = String(query || "").toLowerCase();
+  const sensitiveTerm =
+    normalized.includes(".env") ||
+    normalized.includes("api key") ||
+    normalized.includes("apikey") ||
+    normalized.includes("credentials") ||
+    normalized.includes("secret") ||
+    normalized.includes("token") ||
+    normalized.includes("password") ||
+    normalized.includes("system prompt");
+
+  return (
+    sensitiveTerm &&
+    /\b(give|show|tell|send|print|reveal|share|display|provide|administrator)\b/.test(normalized)
   );
 }
 

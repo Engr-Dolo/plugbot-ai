@@ -27,10 +27,13 @@
   const state = {
     open: false,
     loading: false,
-    history: []
+    history: [],
+    loadingMessage: null
   };
   const fallbackErrorMessage =
     "Sorry, I cannot answer right now. Please try again in a moment.";
+  const timeoutErrorMessage =
+    "The response is taking longer than expected. Please try again.";
   const requestTimeoutMs = 30_000;
 
   const styles = document.createElement("style");
@@ -110,6 +113,8 @@
       line-height: 1.4;
       font-size: 14px;
       word-wrap: break-word;
+      overflow-wrap: anywhere;
+      word-break: break-word;
       white-space: pre-wrap;
     }
 
@@ -157,6 +162,14 @@
       opacity: 0.65;
     }
 
+    .plugbot-status {
+      min-height: 18px;
+      padding: 0 12px 8px;
+      background: #ffffff;
+      color: #4b5563;
+      font-size: 12px;
+    }
+
     @media (max-width: 480px) {
       .plugbot-root {
         right: 12px;
@@ -179,12 +192,13 @@
         <button class="plugbot-close" type="button" aria-label="Close chat">&times;</button>
       </header>
       <div class="plugbot-messages" role="log" aria-live="polite"></div>
-      <form class="plugbot-form">
+      <form class="plugbot-form" aria-label="Send a chat message">
         <input class="plugbot-input" type="text" autocomplete="off" maxlength="4000" placeholder="Type your message" aria-label="Message" />
         <button class="plugbot-send" type="submit">Send</button>
       </form>
+      <div class="plugbot-status" aria-live="polite"></div>
     </section>
-    <button class="plugbot-launcher" type="button" aria-label="Open chat">💬</button>
+    <button class="plugbot-launcher" type="button" aria-label="Open chat" aria-expanded="false">💬</button>
   `;
 
   mountWhenBodyReady(() => {
@@ -198,12 +212,15 @@
   const input = root.querySelector(".plugbot-input");
   const sendButton = root.querySelector(".plugbot-send");
   const messages = root.querySelector(".plugbot-messages");
+  const status = root.querySelector(".plugbot-status");
 
   addMessage("assistant", "Hi. How can I help?");
 
   launcher.addEventListener("click", () => {
     state.open = !state.open;
     root.classList.toggle("is-open", state.open);
+    launcher.setAttribute("aria-expanded", String(state.open));
+    launcher.setAttribute("aria-label", state.open ? "Close chat" : "Open chat");
     if (state.open) {
       input.focus();
     }
@@ -212,6 +229,18 @@
   closeButton.addEventListener("click", () => {
     state.open = false;
     root.classList.remove("is-open");
+    launcher.setAttribute("aria-expanded", "false");
+    launcher.setAttribute("aria-label", "Open chat");
+    launcher.focus();
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (!state.loading) {
+        form.requestSubmit();
+      }
+    }
   });
 
   form.addEventListener("submit", async (event) => {
@@ -234,7 +263,7 @@
       : null;
 
     try {
-      const response = await fetch(`${config.apiUrl}/api/chat`, {
+      const response = await fetch(joinApiUrl(config.apiUrl, "/api/chat"), {
         method: "POST",
         headers: { "content-type": "application/json" },
         signal: controller?.signal,
@@ -247,14 +276,14 @@
 
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload.error || fallbackErrorMessage);
+        throw new Error(mapServerError(payload.error));
       }
 
       addMessage("assistant", payload.reply || "I could not generate a response.");
     } catch (error) {
       const message =
         error?.name === "AbortError"
-          ? "The AI service took too long to respond. Please try again."
+          ? timeoutErrorMessage
           : error?.message || fallbackErrorMessage;
 
       addMessage("assistant", message);
@@ -270,19 +299,31 @@
 
   function addMessage(role, content) {
     state.history.push({ role, content });
+    return appendMessage(role, content);
+  }
 
+  function appendMessage(role, content) {
     const item = document.createElement("div");
     item.className = `plugbot-message ${role}`;
     item.textContent = content;
     messages.appendChild(item);
     messages.scrollTop = messages.scrollHeight;
+    return item;
   }
 
   function setLoading(loading) {
     state.loading = loading;
     input.disabled = loading;
     sendButton.disabled = loading;
-    sendButton.textContent = loading ? "..." : "Send";
+    sendButton.textContent = loading ? "Sending..." : "Send";
+    status.textContent = loading ? "PlugBot is thinking..." : "";
+    if (loading) {
+      state.loadingMessage = appendMessage("assistant", "Thinking...");
+    } else if (state.loadingMessage?.parentNode) {
+      state.loadingMessage.parentNode.removeChild(state.loadingMessage);
+      state.loadingMessage = null;
+      messages.scrollTop = messages.scrollHeight;
+    }
   }
 
   function escapeHtml(value) {
@@ -296,6 +337,27 @@
   function normalizeApiUrl(value) {
     const normalized = String(value || "").trim().replace(/\/+$/, "");
     return normalized || "http://localhost:3000";
+  }
+
+  function joinApiUrl(baseUrl, path) {
+    return `${String(baseUrl || "").replace(/\/+$/, "")}/${String(path || "").replace(/^\/+/, "")}`;
+  }
+
+  function mapServerError(message) {
+    const text = String(message || "");
+    if (!text) {
+      return fallbackErrorMessage;
+    }
+
+    if (
+      text.includes("temporarily unavailable") ||
+      text.includes("many requests") ||
+      text.includes("longer than expected")
+    ) {
+      return text;
+    }
+
+    return fallbackErrorMessage;
   }
 
   function mountWhenBodyReady(callback) {

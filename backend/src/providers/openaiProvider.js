@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 import { buildGroundedSystemPrompt } from "./context.js";
-import { AIProviderError, quotaExhaustedMessage } from "./errors.js";
+import {
+  createProviderError,
+  normalizeProviderError,
+  providerErrorCategories
+} from "./errors.js";
 
 export function createOpenAIProvider({
   apiKey = process.env.OPENAI_API_KEY,
@@ -11,39 +15,41 @@ export function createOpenAIProvider({
 
   return {
     name: "openai",
-    async generateReply({ botId, message, history = [], botContext }) {
+    async generateReply({ botId, message, history = [], botContext, signal }) {
       if (!client) {
-        throw new AIProviderError(
-          "OpenAI is not configured. Set OPENAI_API_KEY before using chat."
-        );
+        throw createProviderError(providerErrorCategories.AUTH_ERROR);
       }
 
       try {
-        const completion = await client.chat.completions.create({
-          model,
-          messages: [
-            {
-              role: "system",
-              content: buildGroundedSystemPrompt({ botId, botContext })
-            },
-            ...history,
-            { role: "user", content: message }
-          ]
-        });
-
-        return (
-          completion.choices[0]?.message?.content?.trim() ||
-          "I could not generate a response."
+        const completion = await client.chat.completions.create(
+          {
+            model,
+            messages: [
+              {
+                role: "system",
+                content: buildGroundedSystemPrompt({ botId, botContext })
+              },
+              ...history,
+              { role: "user", content: message }
+            ]
+          },
+          signal ? { signal } : undefined
         );
+
+        const text = completion.choices[0]?.message?.content?.trim() || "";
+        if (!text) {
+          throw createProviderError(providerErrorCategories.INVALID_RESPONSE);
+        }
+
+        return text;
       } catch (error) {
         if (isOpenAIQuotaExhaustedError(error)) {
-          throw new AIProviderError(quotaExhaustedMessage, {
-            status: 503,
+          throw createProviderError(providerErrorCategories.QUOTA_EXCEEDED, {
             cause: error
           });
         }
 
-        throw new AIProviderError("Something went wrong.", { cause: error });
+        throw normalizeProviderError(error);
       }
     }
   };

@@ -22,6 +22,7 @@ const {
 } = await import("../src/providers/index.js");
 const { createGeminiProvider } = await import("../src/providers/geminiProvider.js");
 const { createOpenAIProvider } = await import("../src/providers/openaiProvider.js");
+const { loadRuntimeConfig, parseAllowedOrigins } = await import("../src/config.js");
 const {
   hasBotConfig,
   resolveBotConfig
@@ -85,11 +86,57 @@ try {
   await runGroundingInspectChecks();
   await runChatApiChecks();
   await runProviderChecks();
+  runRuntimeConfigChecks();
   await runWidgetSafetyChecks();
 
   console.log("Smoke checks passed");
 } finally {
   await fs.rm(tempRoot, { recursive: true, force: true });
+}
+
+function runRuntimeConfigChecks() {
+  assert(
+    parseAllowedOrigins("https://example.com,https://www.example.com").length === 2,
+    "runtime config parses exact allowed origins"
+  );
+
+  assertThrows(
+    () =>
+      loadRuntimeConfig({
+        NODE_ENV: "production",
+        AI_PROVIDER: "mock",
+        ALLOWED_ORIGINS: "https://example.com"
+      }),
+    "production runtime rejects the mock provider"
+  );
+
+  assertThrows(
+    () =>
+      loadRuntimeConfig({
+        NODE_ENV: "production",
+        AI_PROVIDER: "gemini",
+        GEMINI_API_KEY: "test-key",
+        ALLOWED_ORIGINS: "*"
+      }),
+    "production runtime rejects wildcard CORS"
+  );
+
+  assertThrows(
+    () => parseAllowedOrigins("https://example.com/path"),
+    "runtime config rejects origins with paths"
+  );
+
+  const productionConfig = loadRuntimeConfig({
+    NODE_ENV: "production",
+    AI_PROVIDER: "gemini",
+    GEMINI_API_KEY: "test-key",
+    ALLOWED_ORIGINS: "https://example.com"
+  });
+  assert(
+    productionConfig.trustProxyHops === 1 &&
+      productionConfig.allowedOrigins[0] === "https://example.com",
+    "production runtime uses safe Render defaults"
+  );
 }
 
 async function runCliArgChecks() {
@@ -1609,16 +1656,22 @@ async function runProviderChecks() {
             payload.config.systemInstruction.includes("Relevant sanitized website reference content"),
             "Gemini receives grounded provider context"
           );
+          assert(
+            payload.config.abortSignal instanceof AbortSignal,
+            "Gemini receives the provider cancellation signal"
+          );
           return { text: "  Gemini test reply  " };
         }
       }
     }
   });
 
+  const geminiController = new AbortController();
   const geminiReply = await geminiProvider.generateReply({
     botId: "demo-bot",
     message: "Hello",
     history: [{ role: "assistant", content: "Hi. How can I help?" }],
+    signal: geminiController.signal,
     botContext: await resolveKnowledgeContext({
       botConfig: resolveBotConfig("demo-bot"),
       message: "Hello",
@@ -1665,14 +1718,46 @@ async function runWidgetSafetyChecks() {
   const widget = await fs.readFile(widgetPath, "utf8");
 
   assert(widget.includes("window.__PlugBotWidgetMounted"), "widget prevents multiple mounts");
+  assert(widget.includes("currentScript?.dataset.botId"), "widget API contract still reads data-bot-id");
+  assert(widget.includes("currentScript?.dataset.apiUrl"), "widget API contract still reads data-api-url");
   assert(widget.includes("item.textContent = content"), "widget renders chat messages with textContent");
   assert(!widget.includes("item.innerHTML"), "widget does not use innerHTML for user or AI messages");
   assert(widget.includes("AbortController"), "widget uses request timeout cancellation");
   assert(widget.includes("joinApiUrl"), "widget avoids double slashes when joining API URLs");
+  assert(widget.includes("deriveWidgetAssetUrl"), "widget derives avatar assets from script origin");
+  assert(
+    widget.includes('new URL(assetPath, scriptUrl).href'),
+    "avatar asset path resolves relative to widget script URL"
+  );
+  assert(
+    !widget.includes('"/widget/assets/plugbot-ai-avatar.png"'),
+    "avatar asset path is not rooted against customer host"
+  );
+  assert(widget.includes("plugbot-ai-avatar.png"), "widget references optimized avatar asset");
+  assert(widget.includes("createAvatarElement"), "widget has avatar fallback creation");
+  assert(widget.includes("plugbot-avatar-fallback"), "widget exposes fallback avatar UI");
+  assert(widget.includes("is-failed"), "widget handles avatar load failure");
+  assert(
+    widget.includes("Open PlugBot AI assistant"),
+    "launcher has PlugBot-specific accessible label"
+  );
+  assert(widget.includes('aria-label="Close chat"'), "close button accessible label exists");
+  assert(widget.includes('role="dialog"'), "widget identifies the chat window as a dialog");
+  assert(widget.includes('event.key === "Escape"'), "widget supports Escape-to-close behavior");
+  assert(widget.includes("function closeChat()"), "widget uses one consistent close behavior");
   assert(widget.includes("aria-expanded"), "widget exposes launcher expanded state");
   assert(widget.includes("overflow-wrap: anywhere"), "widget wraps long responses");
   assert(widget.includes("form.requestSubmit()"), "widget supports Enter-to-send behavior");
   assert(widget.includes("PlugBot is thinking"), "widget has a clear loading state");
+  assert(widget.includes("state.loadingMessage.parentNode.removeChild"), "loading state is removed");
+  assert(widget.includes("if (!message || state.loading)"), "duplicate submissions remain blocked");
+  assert(widget.includes('body: JSON.stringify({'), "widget still posts the same JSON request shape");
+  assert(widget.includes("botId: config.botId"), "widget still sends configured botId");
+  assert(widget.includes("history: priorHistory"), "widget still sends chat history");
+
+  const avatarPath = path.resolve("../widget/assets/plugbot-ai-avatar.png");
+  const avatar = await fs.stat(avatarPath);
+  assert(avatar.size > 0 && avatar.size < 250_000, "optimized avatar asset exists and is reasonably small");
 }
 
 async function expectUrlReject(url, bot, lookup, label) {
@@ -1754,4 +1839,14 @@ function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function assertThrows(callback, message) {
+  try {
+    callback();
+  } catch {
+    return;
+  }
+
+  throw new Error(message);
 }

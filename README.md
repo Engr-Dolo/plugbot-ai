@@ -32,14 +32,13 @@ The widget contract is unchanged:
 
 ```html
 <script
-  src="PUBLIC_VERCEL_WIDGET_URL/widget/plugbot-widget.js"
+  src="https://plugbot-ai.vercel.app/widget/plugbot-widget.js"
   data-api-url="https://plugbot-ai-6zea.onrender.com"
   data-bot-id="timetomarket-services">
 </script>
 ```
 
-No committed Vercel production domain is present in this repository. Use the
-actual Vercel deployment domain for `PUBLIC_VERCEL_WIDGET_URL`; do not put
+The production static domain is `https://plugbot-ai.vercel.app`. Do not put
 provider API keys in the widget or Vercel environment.
 
 ## Project Structure
@@ -379,8 +378,10 @@ Before redeploying:
 - Vercel does not contain backend provider keys.
 - `ALLOWED_ORIGINS` on Render includes the business website origin.
 - `AI_PROVIDER=gemini` and `GEMINI_API_KEY` are set on Render.
+- `NODE_ENV=production` and `TRUST_PROXY_HOPS=1` are set on Render.
 - The sanitized snapshot exists under `backend/data/knowledge/`.
 - `npm test` passes from `backend/`.
+- `npm audit --omit=dev` reports zero known production vulnerabilities.
 - `npm run knowledge:inspect -- --bot-id=timetomarket-services` prints safe
   metadata only.
 - `npm run grounding:inspect -- --bot-id=timetomarket-services --query="What services do you offer?"`
@@ -392,7 +393,7 @@ Update a business website bot ID only in the script tag:
 
 ```html
 <script
-  src="PUBLIC_VERCEL_WIDGET_URL/widget/plugbot-widget.js"
+  src="https://plugbot-ai.vercel.app/widget/plugbot-widget.js"
   data-api-url="https://plugbot-ai-6zea.onrender.com"
   data-bot-id="timetomarket-services">
 </script>
@@ -405,6 +406,8 @@ Common production mistakes:
   changes.
 - Forgetting to redeploy Vercel after widget changes.
 - Missing the business website origin in Render `ALLOWED_ORIGINS`.
+- Deploying with `AI_PROVIDER=mock`; production startup now rejects mock mode.
+- Omitting `TRUST_PROXY_HOPS=1` on Render, which breaks per-client rate limiting.
 - Putting provider keys in the widget, Vercel public env, or client-side code.
 - Expecting chat to crawl websites live.
 - Generating a snapshot locally but not committing and redeploying it.
@@ -479,7 +482,32 @@ GEMINI_MODEL=gemini-2.5-flash
 
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX=30
+TRUST_PROXY_HOPS=1
+PROVIDER_MAX_RETRIES=1
+PROVIDER_ATTEMPT_TIMEOUT_MS=20000
+PROVIDER_TOTAL_DEADLINE_MS=28000
+PROVIDER_RETRY_BASE_DELAY_MS=250
+SHUTDOWN_TIMEOUT_MS=10000
 ```
+
+Production configuration is validated at startup. Production refuses mock mode,
+wildcard or missing CORS origins, missing provider credentials, malformed
+origins, and out-of-range numeric settings. Render's single proxy hop is trusted
+so rate limiting uses the visitor IP instead of grouping all traffic under the
+platform proxy. Environment variables supplied by the host always take
+precedence over local `.env` files.
+
+The repository includes `render.yaml` for the backend and `vercel.json` for the
+static widget/demo. The Render Blueprint waits for CI checks, runs `npm ci
+--omit=dev`, uses `/health`, and allows up to 30 seconds for graceful shutdown.
+For an existing Render service, add any newly introduced `sync: false` values
+(`GEMINI_API_KEY` and `ALLOWED_ORIGINS`) in the dashboard before syncing or
+redeploying the Blueprint.
+
+`.vercelignore` allowlists only `demo/`, `widget/`, and `vercel.json` so backend
+source, knowledge snapshots, CI files, and local project files are not uploaded
+to the static CDN. The large editable master avatar is retained in source
+control but excluded from the deployment; the optimized 256px avatar is served.
 
 Provider keys are backend-only secrets. Do not commit `.env`, put keys in the
 widget, or configure provider keys in Vercel.

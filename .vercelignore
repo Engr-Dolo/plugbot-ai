@@ -1,0 +1,7 @@
+/*
+!demo
+!widget
+!vercel.json
+
+# Keep the editable source artwork in Git, but do not ship it to the CDN.
+widget/assets/plugbot-ai-master.png

@@ -24,6 +24,40 @@
       border: 1px solid #e5e7eb;
       border-radius: 8px;
       padding: 28px;
+      overflow-wrap: anywhere;
+    }
+
+    .demo-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .demo-avatar-wrap {
+      position: relative;
+      width: 56px;
+      height: 56px;
+      flex: 0 0 auto;
+    }
+
+    .demo-avatar {
+      width: 56px;
+      height: 56px;
+      border: 1px solid #bfdbfe;
+      border-radius: 50%;
+      background: #0f172a;
+      object-fit: cover;
+      object-position: 50% 42%;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    }
+
+    .demo-avatar-fallback {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 800;
     }
 
     h1 {
@@ -41,13 +75,36 @@
       border-radius: 4px;
       padding: 2px 6px;
     }
+
+    @media (max-width: 480px) {
+      main {
+        padding: 32px 14px;
+      }
+
+      section {
+        padding: 22px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+    }
   </style>
 </head>
 
 <body>
   <main>
     <section>
-      <h1>PlugBot AI Demo</h1>
+      <div class="demo-brand">
+        <span class="demo-avatar-wrap">
+          <img class="demo-avatar" src="../widget/assets/plugbot-ai-avatar.png" width="56" height="56" alt="PlugBot AI assistant avatar" loading="eager" decoding="async" />
+          <span class="demo-avatar demo-avatar-fallback" hidden>PB</span>
+        </span>
+        <div>
+          <h1>PlugBot AI Demo</h1>
+          <p>AI assistant widget preview</p>
+        </div>
+      </div>
       <p>
         This page loads the vanilla JavaScript widget from
         <code>../widget/plugbot-widget.js</code>.
@@ -81,11 +138,17 @@
 
     document.getElementById("plugbot-api-url").textContent = apiUrl;
 
+    const demoAvatar = document.querySelector(".demo-avatar-wrap img");
+    demoAvatar.addEventListener("error", () => {
+      demoAvatar.hidden = true;
+      demoAvatar.nextElementSibling.hidden = false;
+    });
+
     const widgetScript = document.createElement("script");
     widgetScript.src = "../widget/plugbot-widget.js";
-    widgetScript.dataset.botId = "demo-bot";
+    widgetScript.dataset.botId = "timetomarket-services";
     widgetScript.dataset.apiUrl = apiUrl;
-    widgetScript.dataset.title = "Demo PlugBot";
+    widgetScript.dataset.title = "PlugBot AI";
     document.body.appendChild(widgetScript);
   </script>
 </body>

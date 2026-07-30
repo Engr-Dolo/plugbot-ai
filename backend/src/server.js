@@ -2,11 +2,13 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import crypto from "node:crypto";
+import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
 import { resolveBotConfig } from "./bots/index.js";
+import { loadRuntimeConfig } from "./config.js";
 import { createJsonKnowledgeStore } from "./knowledge/knowledgeStore.js";
 import { resolveKnowledgeContext } from "./knowledge/knowledgeResolver.js";
 import {
@@ -24,22 +26,18 @@ const __dirname = path.dirname(__filename);
 const backendRoot = path.resolve(__dirname, "..");
 const projectRoot = path.resolve(backendRoot, "..");
 
+// Host-provided environment variables always win. For local development,
+// backend/.env is more specific than the optional project-root .env.
+dotenv.config({ path: path.join(backendRoot, ".env") });
 dotenv.config({ path: path.join(projectRoot, ".env") });
-dotenv.config({
-  path: path.join(backendRoot, ".env"),
-  override: process.env.NODE_ENV !== "test"
-});
 
 const app = express();
-const port = Number(process.env.PORT || 3000);
-const allowedOrigins = getAllowedOrigins(process.env);
-const providerMaxRetries = clampInteger(process.env.PROVIDER_MAX_RETRIES, 1, 0, 2);
-const providerAttemptTimeoutMs = clampInteger(process.env.PROVIDER_ATTEMPT_TIMEOUT_MS, 20_000, 1000, 30_000);
-const providerTotalDeadlineMs = clampInteger(process.env.PROVIDER_TOTAL_DEADLINE_MS, 28_000, 2000, 35_000);
-const providerBaseBackoffMs = clampInteger(process.env.PROVIDER_RETRY_BASE_DELAY_MS, 250, 50, 1000);
+const runtimeConfig = loadRuntimeConfig();
 
 app.locals.aiProvider = createAIProvider();
 app.locals.knowledgeStore = createJsonKnowledgeStore();
+app.disable("x-powered-by");
+app.set("trust proxy", runtimeConfig.trustProxyHops);
 
 const chatRequestSchema = z.object({
   botId: z.string().trim().min(1).max(100),
@@ -55,10 +53,11 @@ const chatRequestSchema = z.object({
     .optional()
 });
 
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(
   cors({
     origin(origin, callback) {
-      if (isOriginAllowed(origin, allowedOrigins, process.env.NODE_ENV)) {
+      if (isOriginAllowed(origin, runtimeConfig.allowedOrigins, runtimeConfig.nodeEnv)) {
         callback(null, true);
         return;
       }
@@ -72,8 +71,8 @@ app.use(express.json({ limit: "128kb" }));
 app.use(
   "/api",
   rateLimit({
-    windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
-    limit: Number(process.env.RATE_LIMIT_MAX || 30),
+    windowMs: runtimeConfig.rateLimitWindowMs,
+    limit: runtimeConfig.rateLimitMax,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many requests. Please try again soon." }
@@ -217,34 +216,7 @@ app.use((error, _req, res, _next) => {
 });
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  app.listen(port, () => {
-    console.log(`PlugBot backend listening on port ${port}`);
-  });
-}
-
-function getAllowedOrigins(env) {
-  const rawOrigins = env.ALLOWED_ORIGINS || env.CORS_ORIGIN || "";
-  const configuredOrigins = rawOrigins
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
-  if (configuredOrigins.length > 0) {
-    return configuredOrigins;
-  }
-
-  if (env.NODE_ENV === "production") {
-    return [];
-  }
-
-  return [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:61328",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:61328"
-  ];
+  startServer();
 }
 
 function isOriginAllowed(origin, origins, nodeEnv) {
@@ -274,9 +246,9 @@ function isPayloadTooLargeError(error) {
 async function generateReplyWithReliability({
   provider,
   payload,
-  maxRetries = providerMaxRetries,
-  attemptTimeoutMs = providerAttemptTimeoutMs,
-  totalDeadlineMs = providerTotalDeadlineMs
+  maxRetries = runtimeConfig.providerMaxRetries,
+  attemptTimeoutMs = runtimeConfig.providerAttemptTimeoutMs,
+  totalDeadlineMs = runtimeConfig.providerTotalDeadlineMs
 }) {
   const deadlineAt = Date.now() + totalDeadlineMs;
   let retryAttemptCount = 0;
@@ -340,7 +312,7 @@ async function withTimeout(task, timeoutMs, controller) {
 
 async function waitForRetry({ attempt, retryAfterMs, deadlineAt }) {
   const jitter = Math.floor(Math.random() * 75);
-  const exponentialDelay = providerBaseBackoffMs * 2 ** attempt + jitter;
+  const exponentialDelay = runtimeConfig.providerBaseBackoffMs * 2 ** attempt + jitter;
   const delayMs = Math.min(retryAfterMs || exponentialDelay, Math.max(0, deadlineAt - Date.now()));
 
   if (delayMs > 0) {
@@ -409,15 +381,6 @@ function sanitizeLogValue(value) {
     .trim();
 }
 
-function clampInteger(value, fallback, min, max) {
-  const parsed = Number(value);
-  if (!Number.isInteger(parsed)) {
-    return fallback;
-  }
-
-  return Math.min(max, Math.max(min, parsed));
-}
-
 class CorsOriginError extends Error {
   constructor(origin) {
     super("Origin is not allowed.");
@@ -426,5 +389,45 @@ class CorsOriginError extends Error {
   }
 }
 
+function startServer() {
+  const server = app.listen(runtimeConfig.port, () => {
+    console.log(`PlugBot backend listening on port ${runtimeConfig.port}`);
+  });
+  let shuttingDown = false;
+
+  const shutdown = (signal) => {
+    if (shuttingDown) {
+      return;
+    }
+
+    shuttingDown = true;
+    console.info("server_shutdown_started", { signal });
+
+    const forcedShutdown = setTimeout(() => {
+      console.error("server_shutdown_forced", { signal });
+      server.closeAllConnections?.();
+      process.exitCode = 1;
+    }, runtimeConfig.shutdownTimeoutMs);
+    forcedShutdown.unref();
+
+    server.close((error) => {
+      clearTimeout(forcedShutdown);
+      if (error) {
+        console.error("server_shutdown_failed", { signal, errorName: error.name });
+        process.exitCode = 1;
+        return;
+      }
+
+      console.info("server_shutdown_completed", { signal });
+    });
+  };
+
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  process.once("SIGINT", () => shutdown("SIGINT"));
+
+  return server;
+}
+
 export { isOpenAIQuotaExhaustedError, quotaExhaustedMessage };
+export { startServer };
 export default app;

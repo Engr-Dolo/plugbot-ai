@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: plugbot-ai
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "60000"
+      - key: RATE_LIMIT_MAX
+        value: "30"
+      - key: PROVIDER_MAX_RETRIES
+        value: "1"
+      - key: PROVIDER_ATTEMPT_TIMEOUT_MS
+        value: "20000"
+      - key: PROVIDER_TOTAL_DEADLINE_MS
+        value: "28000"
+      - key: PROVIDER_RETRY_BASE_DELAY_MS
+        value: "250"
+      - key: SHUTDOWN_TIMEOUT_MS
+        value: "10000"

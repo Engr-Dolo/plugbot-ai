@@ -20,7 +20,7 @@ export function createGeminiProvider({
 
   return {
     name: "gemini",
-    async generateReply({ botId, message, history = [], botContext }) {
+    async generateReply({ botId, message, history = [], botContext, signal }) {
       if (!client) {
         throw createProviderError(providerErrorCategories.AUTH_ERROR);
       }
@@ -33,6 +33,7 @@ export function createGeminiProvider({
             { role: "user", parts: [{ text: message }] }
           ],
           config: {
+            abortSignal: signal,
             systemInstruction: buildGroundedSystemPrompt({ botId, botContext })
           }
         });
